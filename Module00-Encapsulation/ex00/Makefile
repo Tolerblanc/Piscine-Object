@@ -3,7 +3,9 @@ NAME = ex00.out
 CC = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp
+SRCS = main.cpp \
+		Account.cpp \
+		Bank.cpp
 		
 OBJS = $(SRCS:.cpp=.o)
 
