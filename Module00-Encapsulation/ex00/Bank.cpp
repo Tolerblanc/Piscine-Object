@@ -1,15 +1,20 @@
 #include "Bank.hpp"
 
-Bank::Bank() : liquidity(0), interestRate(0.5), nextId(0)
+Bank::Bank() : liquidity(0), interestRate(0.05), nextId(0)
 {
 }
 
-Bank::Bank(int p_liquidity) : liquidity(p_liquidity), interestRate(0.5), nextId(0)
+Bank::Bank(int p_liquidity) : liquidity(p_liquidity), interestRate(0.05), nextId(0)
 {
 }
 
 Bank::~Bank()
 {
+}
+
+int Bank::getPoolSize() const
+{
+    return (clientAccounts.size());
 }
 
 const int& Bank::getLiquidity() const
@@ -44,8 +49,10 @@ const int& Bank::addAccount(int p_balance)
         this->liquidity += p_balance * interestRate;
         p_balance -= p_balance * interestRate;
     }
-    this->clientAccounts[id] = Account(id, p_balance);
-    return (id);
+
+    Account *newAccount = new Account(id, p_balance);
+    this->clientAccounts[id] = newAccount;
+    return (this->clientAccounts.at(id)->getId());
 }
 
 const int& Bank::loan(int p_amount)
@@ -64,31 +71,35 @@ void Bank::deposit(int p_id, int p_amount)
     if (p_amount <= 0)
         throw InvalidAmountException();
     
-    double prevBalance = clientAccounts[p_id].getBalance();
+    double prevBalance = clientAccounts.at(p_id)->getBalance();
     this->clientAccounts.erase(p_id);
 
     this->liquidity += p_amount * interestRate;
     p_amount -= p_amount * interestRate;
-    this->clientAccounts[p_id] = Account(p_id, p_amount + prevBalance);
+
+    Account *newAccount = new Account(p_id, prevBalance + p_amount);
+    this->clientAccounts[p_id] = newAccount;
 }
 
 void Bank::withdraw(int p_id, int p_amount)
 {
     if (clientAccounts.find(p_id) == clientAccounts.end())
         throw InvalidAccountIdException();
-    if (p_amount <= 0 || p_amount > clientAccounts[p_id].getBalance())
+    if (p_amount <= 0 || p_amount > clientAccounts.at(p_id)->getBalance())
         throw InvalidAmountException();
 
-    double prevBalance = clientAccounts[p_id].getBalance();
+    double prevBalance = clientAccounts.at(p_id)->getBalance();
     this->clientAccounts.erase(p_id);
-    this->clientAccounts[p_id] = Account(p_id, prevBalance - p_amount);
+
+    Account *newAccount = new Account(p_id, prevBalance - p_amount);
+    this->clientAccounts[p_id] = newAccount;
 }
 
 void Bank::deleteAccount(int p_id)
 {
     if (clientAccounts.find(p_id) == clientAccounts.end())
         throw InvalidAccountIdException();
-    if (clientAccounts[p_id].getBalance() < 0)
+    if (clientAccounts.at(p_id)->getBalance() < 0)
         throw LoanAccountDeletionException();
     this->availableIds.push_back(p_id);
     this->clientAccounts.erase(p_id);
@@ -98,7 +109,7 @@ const Account& Bank::getAccount(int p_id) const
 {
     if (clientAccounts.find(p_id) == clientAccounts.end())
         throw InvalidAccountIdException();
-    return (clientAccounts.at(p_id));
+    return (*clientAccounts.at(p_id));
 }
 
 const Account& Bank::operator[](int p_id) const
@@ -131,11 +142,10 @@ const char * Bank::NotEnoughAccountPoolException::what(void) const throw()
     return ("Not enough account pool");
 }
 
-friend std::ostream& operator << (std::ostream& p_os, const Bank& p_bank)
+std::ostream& operator << (std::ostream& p_os, const Bank& p_bank)
 {
-    p_os << "Bank informations : " << std::endl;
-    p_os << "Liquidity : " << p_bank.liquidity << std::endl;
-    for (auto &clientAccount : p_bank.clientAccounts)
-    p_os << *clientAccount << std::endl;
+    p_os << "Bank liquidity: " << p_bank.getLiquidity() << std::endl;
+    p_os << "Bank interest rate: " << p_bank.getinterestRate() << std::endl;
+    p_os << "Bank accounts: " << p_bank.getPoolSize() << std::endl;
     return (p_os);
 }

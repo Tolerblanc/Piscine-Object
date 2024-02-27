@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <deque>
@@ -5,14 +6,12 @@
 #include <exception>
 #include "Account.hpp"
 
-class Account;
-
 class Bank
 {
 private:
 	int liquidity;
     float interestRate;
-    std::map<int, Account> clientAccounts;
+    std::map<int, Account *> clientAccounts;
     int nextId;
     std::deque<int> availableIds;
 
@@ -24,6 +23,7 @@ public:
     Bank(int liquidity);
     ~Bank();
 
+    int getPoolSize() const;
     const int& getLiquidity() const;
 
     void setinterestRate(float p_interestRate);
@@ -68,5 +68,6 @@ public:
             const char * what(void) const throw();
     };
 
-	friend std::ostream& operator<< (std::ostream& p_os, const Bank& p_bank);
 };
+
+std::ostream& operator<< (std::ostream& p_os, const Bank& p_bank);
