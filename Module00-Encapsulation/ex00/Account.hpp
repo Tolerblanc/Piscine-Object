@@ -6,8 +6,8 @@ class Bank;
 class Account
 {
 private:
-    int id;
 	double balance;
+    int id;
     friend class Bank;
 
 	Account(int id, int balance);

@@ -9,11 +9,11 @@
 class Bank
 {
 private:
-	int liquidity;
-    float interestRate;
     std::map<int, Account *> clientAccounts;
-    int nextId;
     std::deque<int> availableIds;
+    float interestRate;
+	int liquidity;
+    int nextId;
 
     Bank(const Bank& p_bank);
     Bank& operator=(const Bank& p_bank);
